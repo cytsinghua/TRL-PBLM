@@ -101,11 +101,17 @@ def preproc(pivot_num,pivot_min_st,src,dest):
             pickle.dump(train, f)
         with open(filename + "/train_target", 'wb') as f:
             pickle.dump(train_target, f)
+        with open(filename + "/test", 'wb') as f:
+            pickle.dump(test, f)
+        with open(filename + "/test_target", 'wb') as f:
+            pickle.dump(test_target, f)
     else:
         with open(filename+"/train", 'rb') as f:
             train = pickle.load(f)
         with open(filename+"/train_target", 'rb') as f:
             train_target = pickle.load(f)
+
+
 
 
 

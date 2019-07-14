@@ -31,7 +31,7 @@ if __name__ == '__main__':
     # eighth param: hidden units number for the PBLM model
     #output: the software will create corresponding directory with the model
 
-    #tr.train(domain[0], domain[1], 100, 10, 128, 10000, 500, 256, 2, sorting_criteria[0])
+    tr.train(domain[0], domain[1], 100, 10, 128, 10000, 500, 256, 2, sorting_criteria[0])
 
 
 

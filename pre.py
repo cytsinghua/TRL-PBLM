@@ -100,7 +100,7 @@ def preproc(pivot_num,pivot_min_st,src,dest):
         with open(filename + "/train", 'wb') as f:
             pickle.dump(train, f)
         with open(filename + "/train_target", 'wb') as f:
-            pickle.load(train_target, f)
+            pickle.dump(train_target, f)
     else:
         with open(filename+"/train", 'rb') as f:
             train = pickle.load(f)

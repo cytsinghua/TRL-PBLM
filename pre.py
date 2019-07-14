@@ -96,6 +96,10 @@ def preproc(pivot_num,pivot_min_st,src,dest):
     if not os.path.exists(os.path.dirname(filename)):
         #gets all the train and test for sentiment classification
         train, train_target, test, test_target = extract_and_split("data/"+src+"/negative.parsed","data/"+src+"/positive.parsed")
+        with open(filename + "/train", 'wb') as f:
+            pickle.dump(train, f)
+        with open(filename + "/train_target", 'wb') as f:
+            pickle.load(train_target, f)
     else:
         with open(filename+"/train", 'rb') as f:
             train = pickle.load(f)
@@ -156,17 +160,3 @@ def preproc(pivot_num,pivot_min_st,src,dest):
     with open(src + "_to_" + dest + "/pivots/"+str(pivot_num)+"_meta", 'wb') as f:
         pickle.dump(pivots_meta, f)
     return names,len(source),len(target)
-
-
-    with open(filename + "/train", 'wb') as f:
-        train = pickle.dump(train, f)
-    with open(filename + "/train_target", 'wb') as f:
-        train_target = pickle.load(train_target, f)
-
-
-
-
-
-
-
-

@@ -96,6 +96,7 @@ def preproc(pivot_num,pivot_min_st,src,dest):
     if not os.path.exists(os.path.dirname(filename)):
         #gets all the train and test for sentiment classification
         train, train_target, test, test_target = extract_and_split("data/"+src+"/negative.parsed","data/"+src+"/positive.parsed")
+        os.makedirs(os.path.dirname(filename))
         with open(filename + "/train", 'wb') as f:
             pickle.dump(train, f)
         with open(filename + "/train_target", 'wb') as f:

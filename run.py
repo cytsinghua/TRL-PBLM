@@ -31,7 +31,7 @@ if __name__ == '__main__':
     # eighth param: hidden units number for the PBLM model
     #output: the software will create corresponding directory with the model
 
-    tr.train(domain[0], domain[1], 100, 10, 128, 10000, 500, 256, 2, sorting_criteria[0])
+    #tr.train(domain[0], domain[1], 100, 10, 128, 10000, 500, 256, 2, sorting_criteria[0])
 
 
 
@@ -51,5 +51,7 @@ if __name__ == '__main__':
     # output: the results file will be created in the same directory
     # of the model under the results directory in the "lstm" dir
     #sentiment.PBLM_LSTM(domain[0], domain[1], 500, 500, 256, 10000, 256, 256)
-    sentiment.PBLM_CNN(domain[0], domain[1], 100, 10, 128, 10000, 500, 256, 250, 3,  2, sorting_criteria[0])
+    (src, dest, pivot_num, max_review_len, embedding_vecor_length_rep, topWords, hidden_units_num_rep,
+     filters, kernel_size, iter_num, criteria)
+    sentiment.PBLM_CNN(domain[0], domain[1], 100, 500, 128, 10000, 256, 250, 3,  2, sorting_criteria[0])
 

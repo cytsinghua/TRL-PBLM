@@ -25,10 +25,9 @@ from keras.models import load_model
 import numpy as np
 from keras.models import load_model
 from keras.models import Model
-
+from keras.layers import Merge
 from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
-
 np.random.seed(7)
 
 
@@ -107,11 +106,11 @@ def partial(model, x):
 
 
 def PBLM_CNN(src,dest,pivot_num,max_review_len,embedding_vecor_length_rep,topWords,hidden_units_num_rep,
-             filters, kernel_size, iter_num, criteria):
-    model_path = src + "_to_" + dest + "/models/" + criteria + "-"+str(iter_num) + "/" + src + "_" + dest + "_" + str(pivot_num) + "_" + str(
-        hidden_units_num_rep) + "_" +str(embedding_vecor_length_rep)+ "_" + ".model"+"."+str(iter_num-1)
+             filters, kernel_size):
+    model_path = src+"_to_"+dest+"/models/model_"+src+"_"+dest+"_"+str(pivot_num) + "_" + str(
+        hidden_units_num_rep) + "_" +str(embedding_vecor_length_rep)+ "_" + ".model"
     model = load_model(model_path)
-    split_dir = "split/" + src + "_to_" + dest
+    split_dir = src + "_to_" + dest
     # gets all the train and test for sentiment classification
     with open(split_dir + "/split/train", 'rb') as f:
         train = pickle.load(f)
@@ -158,17 +157,12 @@ def PBLM_CNN(src,dest,pivot_num,max_review_len,embedding_vecor_length_rep,topWor
     X_train =  partial(modelT, X_train)
     X_val =  partial(modelT, X_val)
 
-    print "train shape ",X_train.shape
-    print "val shape ", X_val.shape
-    print "test shape ", X_test.shape
-
 
 
 
     train_data = X_train
     val_data = X_val
     test_data = X_test
-
     sent_model = Sequential()
 
     sent_model.add(Conv1D(filters, kernel_size, padding='valid', activation='relu', input_shape=(max_review_len, hidden_units_num_rep)))
@@ -179,7 +173,7 @@ def PBLM_CNN(src,dest,pivot_num,max_review_len,embedding_vecor_length_rep,topWor
     print sent_model.layers
     print(sent_model.summary())
 
-    model_str = src + "_to_" + dest + "/sent_models_cnn/" + criteria + "-"+str(iter_num) + "/model_" + str(pivot_num)  +"_" + str(hidden_units_num_rep)+"_.model"
+    model_str = src + "_to_" + dest + "/sent_models_cnn/model_" + str(pivot_num)  +"_" + str(hidden_units_num_rep)+"_.model"
     filename = model_str
     if not os.path.exists(os.path.dirname(filename)):
         os.makedirs(os.path.dirname(filename))
@@ -199,7 +193,7 @@ def PBLM_CNN(src,dest,pivot_num,max_review_len,embedding_vecor_length_rep,topWor
     print('Test loss:', test_score)
     print('Test accuracy:', test_acc)
 
-    score_path = src+"_to_"+dest+"/results/" + criteria + "-"+str(iter_num) + "/cnn/results.txt"
+    score_path = src+"_to_"+dest+"/results/cnn/results.txt"
     sentence = "pivots = " + str(pivot_num) + " HU rep " + str(
         hidden_units_num_rep) + " word rep size " + str(embedding_vecor_length_rep)  +  " the val acc " + str(val_acc) + " test acc "+str(test_acc)
 
@@ -209,112 +203,3 @@ def PBLM_CNN(src,dest,pivot_num,max_review_len,embedding_vecor_length_rep,topWor
     with open(score_path , "a") as myfile:
         myfile.write(sentence+"\n")
 
-
-def PBLM_LSTM(src,dest,pivot_num,max_review_len,embedding_vecor_length_rep,topWords,hidden_units_num_rep, hidden_units_num):
-
-
-    model_path = src+"_to_"+dest+"/models/model_"+src+"_"+dest+"_"+str(pivot_num) + "_" + str(
-        hidden_units_num_rep) + "_" +str(embedding_vecor_length_rep)+ "_" + ".model"
-    model = load_model(model_path)
-    split_dir =  src + "_to_" + dest
-    # gets all the train and test for sentiment classification
-    with open(split_dir + "/split/train", 'rb') as f:
-        train = pickle.load(f)
-    with open(split_dir + "/split/test", 'rb') as f:
-        val = pickle.load(f)
-
-
-    unlabeled, source, target = pre.XML2arrayRAW("data/" + src + "/" + src + "UN.txt",
-                                                 "data/" + dest + "/" + dest + "UN.txt")
-
-    dest_test, source, target = XML2arrayRAW("data/" + dest + "/negative.parsed",
-                                             "data/" + dest + "/positive.parsed")
-    unlabeled = getClearList(unlabeled)
-    train = getClearList(train)
-
-
-    tok = Tokenizer(num_words = topWords, split=" ")
-    tok.fit_on_texts(train + unlabeled)
-
-    X_train = tok.texts_to_sequences(train)
-    X_train = sequence.pad_sequences(X_train, maxlen=max_review_len)
-    train_count = 800
-    Y_train = [0] * train_count + [1] * train_count
-    val = getClearList(val)
-    X_val = tok.texts_to_sequences(val)
-    X_val = sequence.pad_sequences(X_val, maxlen=max_review_len)
-    val_count = 200
-    Y_val =  [0] * val_count + [1] * val_count
-    dest_test = getClearList(dest_test)
-    X_test = tok.texts_to_sequences(dest_test)
-    X_test = sequence.pad_sequences(X_test, maxlen=max_review_len)
-    test_count = 1000
-    Y_test = [0]*test_count+[1]*test_count
-    #loading the PBLM model without the softmax layer
-    modelT = Sequential()
-    for i in range(len(model.layers)-1):
-        modelT.add(model.layers[i])
-        modelT.layers[i].trainable = False
-        modelT.layers[i].mask_zero = False
-
-
-
-    modelT.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
-    print modelT.summary()
-
-    filters = 250
-    kernel_size = 3
-
-
-
-
-    embedding_vecor_length = embedding_vecor_length_rep
-
-    LSTMlayer = LSTM(hidden_units_num,name='sentLSTM')
-    sent_model = Sequential()
-
-    #connecting the PBLM to the LSTM
-    sent_model.add(modelT)
-    train_data = X_train
-    val_data = X_val
-    test_data = X_test
-    sent_model.add(LSTMlayer)
-    sent_model.add(Dense(1, activation='sigmoid'))
-    sent_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    print sent_model.layers
-    print(sent_model.summary())
-    model_str = src + "_to_" + dest + "/sent_models_lstm/model_" + str(pivot_num) + "_" +str(
-        hidden_units_num) + "_" +str(embedding_vecor_length)+"_" + str(hidden_units_num_rep)+".model"
-    filename = model_str
-    if not os.path.exists(os.path.dirname(filename)):
-        os.makedirs(os.path.dirname(filename))
-    #saves the best model
-    modelCheckpoint = ModelCheckpoint(filename, monitor='val_loss', verbose=0, save_best_only=True,
-                                      save_weights_only=False, mode='min', period=1)
-
-    #stops as soon as the validation loss stops decreasing
-    earlyStopping = EarlyStopping(monitor='val_loss', patience=2, mode='min')
-    sent_model.fit(train_data, Y_train, validation_data=(val_data, Y_val), epochs=10, batch_size=16,callbacks=[earlyStopping,modelCheckpoint])
-    print(sent_model.summary())
-    print sent_model.get_config()
-    sent_model = load_model(filename)
-    val_score, val_acc =sent_model.evaluate(val_data, Y_val, batch_size=16)
-
-
-    print('val loss:', val_score)
-    print('val accuracy:', val_acc)
-
-    test_score, test_acc = sent_model.evaluate(test_data, Y_test, batch_size=16)
-
-    print('Test loss:', test_score)
-    print('Test accuracy:', test_acc)
-
-    score_path = src+"_to_"+dest+"/results/lstm/results.txt"
-    sentence = "pivots = " + str(pivot_num) + " HU rep " + str(
-        hidden_units_num_rep) + " word rep size " + str(embedding_vecor_length_rep) + " sent HU "+ str(hidden_units_num) +  " the val acc " + str(val_acc) + " test acc "+str(test_acc)
-
-    if not os.path.exists(os.path.dirname(score_path)):
-        os.makedirs(os.path.dirname(score_path))
-
-    with open(score_path , "a") as myfile:
-        myfile.write(sentence+"\n")

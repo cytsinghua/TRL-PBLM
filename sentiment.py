@@ -25,9 +25,10 @@ from keras.models import load_model
 import numpy as np
 from keras.models import load_model
 from keras.models import Model
-from keras.layers import Merge
+
 from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
+
 np.random.seed(7)
 
 
@@ -106,9 +107,9 @@ def partial(model, x):
 
 
 def PBLM_CNN(src,dest,pivot_num,max_review_len,embedding_vecor_length_rep,topWords,hidden_units_num_rep,
-             filters, kernel_size):
-    model_path = src+"_to_"+dest+"/models/model_"+src+"_"+dest+"_"+str(pivot_num) + "_" + str(
-        hidden_units_num_rep) + "_" +str(embedding_vecor_length_rep)+ "_" + ".model"
+             filters, kernel_size, iter_num, criteria):
+    model_path = src + "_to_" + dest + "/models/" + criteria + "-"+str(iter_num) + "/" + src + "_" + dest + "_" + str(pivot_num) + "_" + str(
+        hidden_units_num_rep) + "_" +str(embedding_vecor_length_rep)+ "_" + ".model"+"."+str(iter_num-1)
     model = load_model(model_path)
     split_dir = src + "_to_" + dest
     # gets all the train and test for sentiment classification
@@ -157,12 +158,17 @@ def PBLM_CNN(src,dest,pivot_num,max_review_len,embedding_vecor_length_rep,topWor
     X_train =  partial(modelT, X_train)
     X_val =  partial(modelT, X_val)
 
+    print "train shape ",X_train.shape
+    print "val shape ", X_val.shape
+    print "test shape ", X_test.shape
+
 
 
 
     train_data = X_train
     val_data = X_val
     test_data = X_test
+
     sent_model = Sequential()
 
     sent_model.add(Conv1D(filters, kernel_size, padding='valid', activation='relu', input_shape=(max_review_len, hidden_units_num_rep)))
@@ -173,7 +179,7 @@ def PBLM_CNN(src,dest,pivot_num,max_review_len,embedding_vecor_length_rep,topWor
     print sent_model.layers
     print(sent_model.summary())
 
-    model_str = src + "_to_" + dest + "/sent_models_cnn/model_" + str(pivot_num)  +"_" + str(hidden_units_num_rep)+"_.model"
+    model_str = src + "_to_" + dest + "/sent_models_cnn/" + criteria + "-"+str(iter_num) + "/model_" + str(pivot_num)  +"_" + str(hidden_units_num_rep)+"_.model"
     filename = model_str
     if not os.path.exists(os.path.dirname(filename)):
         os.makedirs(os.path.dirname(filename))
@@ -193,7 +199,7 @@ def PBLM_CNN(src,dest,pivot_num,max_review_len,embedding_vecor_length_rep,topWor
     print('Test loss:', test_score)
     print('Test accuracy:', test_acc)
 
-    score_path = src+"_to_"+dest+"/results/cnn/results.txt"
+    score_path = src+"_to_"+dest+"/results/" + criteria + "-"+str(iter_num) + "/cnn/results.txt"
     sentence = "pivots = " + str(pivot_num) + " HU rep " + str(
         hidden_units_num_rep) + " word rep size " + str(embedding_vecor_length_rep)  +  " the val acc " + str(val_acc) + " test acc "+str(test_acc)
 
@@ -202,4 +208,3 @@ def PBLM_CNN(src,dest,pivot_num,max_review_len,embedding_vecor_length_rep,topWor
 
     with open(score_path , "a") as myfile:
         myfile.write(sentence+"\n")
-

@@ -214,7 +214,7 @@ def GetNewModel(model_str, model, names ,meta):
 def train_PBLM(src,dest,pivot_num,pivot_min_st,word_vector_size,topWords,max_review_len,hidden_units_num,names,
                current_iter, iter_num,criteria):
 
-    split_dir ="split/" + src+"_to_"+dest
+    split_dir =src+"_to_"+dest
     # gets all the train sentiment classification
     with open(split_dir+"/split/train", 'rb') as f:
         train = pickle.load(f)
@@ -329,6 +329,3 @@ def SortByCriteria(criteria, meta, names,source_count,target_count):
         sortedByCriteria = [names for _, names in sorted(zip(freq,names), reverse=True)]
 
     return sortedByCriteria
-
-
-

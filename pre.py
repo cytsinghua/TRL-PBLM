@@ -158,6 +158,12 @@ def preproc(pivot_num,pivot_min_st,src,dest):
     return names,len(source),len(target)
 
 
+    with open(filename + "/train", 'rb') as f:
+        train = pickle.dump(train, f)
+    with open(filename + "/train_target", 'rb') as f:
+        train_target = pickle.load(train_target, f)
+
+
 
 
 
